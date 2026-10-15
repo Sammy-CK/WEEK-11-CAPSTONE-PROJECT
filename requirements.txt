@@ -6,3 +6,4 @@ python-dotenv
 ruff
 pyjwt
 bcrypt
+openai

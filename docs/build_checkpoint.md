@@ -1,20 +1,22 @@
 # Build checkpoint
 
 ## Works now
-- `pytest -q` green (unit layer); `pytest tests/test_security_smoke.py -q` green
-- `python evals/run_eval.py evals/golden.jsonl` prints golden-set score
-- `python scripts/diagnose_fixture.py fixtures/triage_messages_sample.jsonl` OK
-- `python -m services.triage.rag_smoke` grounds one answer from `services/triage/knowledge/`
-- Stub MVP: `handle_message` / `agents/run_stub.py` — route, RAG snippet, logistics tool
-- `uvicorn services.triage.app:app --port 8000` → `GET /health` 200
-- `perf_stub.json` from `scripts/measure_perf.py` (teaching p95, not SLA)
+- **Path:** AfyaPlus Module 4 Capstone (`proposal.md`)
+- **skill_matrix.md** and **integration_map.json** complete; map paths exist on disk
+- **pytest -q** unit layer green; **tests/test_security_smoke.py** present; **eval** golden-set **3/3 = 1.00**
+- **Minimum Working Product** end-to-end in **stub mode** (CI); optional **live triage** locally when `OPENAI_API_KEY` set and `FORCE_STUB=0`
+- **fixtures/triage_messages_sample.jsonl:** ~300 synthetic triage rows (no production scrape)
+- **RAG:** `python -m services.triage.rag_smoke` over `services/triage/knowledge/`
+- **Agent stub:** `agents/run_stub.py` — route, grounded snippet, logistics tool
+- **GitHub Actions:** ruff, pytest, smoke, eval
 
-## Incident note
-- Broke gold row T-002 by setting `label` to `triage` while text stayed `track delivery`.
-- `pytest tests/unit/test_fixture_routes.py` failed on assert `route(...) == label`.
-- Restored `label` to `logistics_lookup`; diagnose script and unit tests green again.
+## Incident note (Tuesday diagnosis drill)
+- Broke gold row **T-002** label to `triage` while text stayed `track delivery`.
+- **pytest** `tests/unit/test_fixture_routes.py` failed; restored `logistics_lookup`.
+- **diagnose_fixture.py** green after fix.
 
 ## Deferred
-- Full Week 10 Sokoni `mismatch.py` join and catalog fixtures under `services/catalog/fixtures/`
-- Live LLM calls; MCP server process (tool surface is stub dict today)
-- Thursday doc pack, peer review deck, presentation PDF
+- Full Week 10 Sokoni **mismatch.py** join and dedicated catalog fixtures under `services/catalog/fixtures/`
+- **Live cloud deploy** (steps documented only in `docs/deployment.md`)
+- **Live LLM agent loops** beyond a capped Thursday demo (~$1 teaching budget)
+- Running MCP server process (logistics returns structured dicts; no long-lived MCP in CI)

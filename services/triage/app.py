@@ -4,11 +4,14 @@ import json
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from services.triage.auth import check_password, create_token, current_user
 from services.triage.handler import handle_message
+
+load_dotenv()
 
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 PIN_PATH = PROMPTS_DIR / "pin.json"
@@ -50,6 +53,14 @@ class TriageResponse(BaseModel):
     stub_mode: bool
 
 
+def should_use_stub(force_stub: bool = False) -> bool:
+    if force_stub:
+        return True
+    if os.getenv("FORCE_STUB", "1") == "1":
+        return True
+    return os.getenv("OPENAI_API_KEY", "") in ("", "stub")
+
+
 def stub_triage(message: str, county: str, pin: dict) -> dict:
     low = message.lower()
     urgency = "low"
@@ -67,8 +78,69 @@ def stub_triage(message: str, county: str, pin: dict) -> dict:
         "advice": advice,
         "model_id": model_id,
         "prompt_version": pin.get("prompt_version", PROMPT_VERSION),
-        "stub_mode": os.getenv("OPENAI_API_KEY") in (None, "", "stub"),
+        "stub_mode": True,
     }
+
+
+def live_triage(message: str, county: str, pin: dict) -> dict:
+    """Optional live call when key present and FORCE_STUB=0; fail closed to stub."""
+    from openai import OpenAI
+
+    model = pin.get("model_id") or "gpt-4o-mini"
+    if model == "stub-triage-v1":
+        model = "gpt-4o-mini"
+    prompt_path = PROMPTS_DIR / f"triage_system_v{PROMPT_VERSION}.txt"
+    system = (
+        prompt_path.read_text(encoding="utf-8")
+        if prompt_path.is_file()
+        else "Never diagnose. Classify urgency low, medium, or high."
+    )
+    try:
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model=model,
+            temperature=0,
+            max_tokens=120,
+            messages=[
+                {"role": "system", "content": system},
+                {
+                    "role": "user",
+                    "content": (
+                        f"County: {county}. Message: {message}. "
+                        "Reply with URGENCY: low|medium|high then ADVICE: one short sentence."
+                    ),
+                },
+            ],
+        )
+    except Exception:
+        out = stub_triage(message, county, pin)
+        out["stub_mode"] = True
+        return out
+
+    text = response.choices[0].message.content or ""
+    urgency = "low"
+    advice = "Seek in-person care if symptoms worsen. Not a diagnosis."
+    for line in text.splitlines():
+        upper = line.upper()
+        if upper.startswith("URGENCY:"):
+            value = line.split(":", 1)[1].strip().lower()
+            if value in ("low", "medium", "high"):
+                urgency = value
+        if upper.startswith("ADVICE:"):
+            advice = line.split(":", 1)[1].strip()
+    return {
+        "urgency": urgency,
+        "advice": advice,
+        "model_id": model,
+        "prompt_version": pin.get("prompt_version", PROMPT_VERSION),
+        "stub_mode": False,
+    }
+
+
+def triage_for_message(message: str, county: str, pin: dict, force_stub: bool) -> dict:
+    if should_use_stub(force_stub):
+        return stub_triage(message, county, pin)
+    return live_triage(message, county, pin)
 
 
 @app.get("/health")
@@ -99,7 +171,7 @@ def triage(request: TriageRequest, user: dict = Depends(current_user)):
     pin = load_pin()
     result = handle_message(
         {"text": request.message, "message": request.message, "county": request.county},
-        stub=True,
+        stub=False,
     )
     if result.get("status") != "ok":
         raise HTTPException(status_code=400, detail=result.get("detail", "bad request"))

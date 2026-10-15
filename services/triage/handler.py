@@ -1,6 +1,4 @@
 """Orchestration for stub MVP: route, grounded lookup, one tool surface."""
-import os
-
 from agents.router import route
 from agents.tools.logistics import lookup_shipment
 from services.catalog.stub_mismatch import flag_mismatch
@@ -12,15 +10,15 @@ def handle_message(payload: dict, stub: bool = True) -> dict:
     if not text:
         return {"status": "error", "detail": "empty message"}
 
-    from services.triage.app import load_pin, stub_triage
+    from services.triage.app import load_pin, should_use_stub, triage_for_message
 
     tool = route(text)
     pin = load_pin()
-    stub_mode = stub or os.getenv("OPENAI_API_KEY") in (None, "", "stub")
+    use_stub = should_use_stub(stub)
     out: dict = {
         "status": "ok",
         "route": tool,
-        "stub_mode": stub_mode,
+        "stub_mode": use_stub,
     }
 
     if tool == "logistics_lookup":
@@ -36,7 +34,8 @@ def handle_message(payload: dict, stub: bool = True) -> dict:
 
     out["grounded_snippet"] = ground_answer(text)
     county = payload.get("county") or "Nairobi"
-    tri = stub_triage(text, county, pin)
+    tri = triage_for_message(text, county, pin, force_stub=stub)
+    out["stub_mode"] = tri["stub_mode"]
     out["urgency"] = tri["urgency"]
     out["advice"] = tri["advice"]
     out["model_id"] = tri["model_id"]
