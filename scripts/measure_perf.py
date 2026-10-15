@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Change for your project: nothing. Times N calls to a URL and writes perf_stub.json."""
 import argparse
 import json

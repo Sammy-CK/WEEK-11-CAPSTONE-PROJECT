@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Change for your project: nothing. Compares fixture labels against agents.router.route()."""
 import json
 import sys

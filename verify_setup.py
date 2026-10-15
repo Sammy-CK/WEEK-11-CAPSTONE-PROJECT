@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Week 11 environment check. Run: python verify_setup.py"""
 import shutil
 import subprocess

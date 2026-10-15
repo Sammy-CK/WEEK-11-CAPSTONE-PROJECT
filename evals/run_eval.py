@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Change for your project: nothing. Prints a score against evals/golden.jsonl."""
 import json
 import sys

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Change for your project: nothing. Generates a generic labelled-record fixture.
 Usage: python scripts/make_fixture.py --rows 300 --out fixtures/triage_messages_sample.jsonl
 """
