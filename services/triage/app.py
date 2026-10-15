@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from services.triage.auth import check_password, create_token, current_user
+from services.triage.handler import handle_message
 
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 PIN_PATH = PROMPTS_DIR / "pin.json"
@@ -96,12 +97,29 @@ def login(body: LoginRequest):
 @app.post("/triage", response_model=TriageResponse)
 def triage(request: TriageRequest, user: dict = Depends(current_user)):
     pin = load_pin()
-    result = stub_triage(request.message, request.county, pin)
+    result = handle_message(
+        {"text": request.message, "message": request.message, "county": request.county},
+        stub=True,
+    )
+    if result.get("status") != "ok":
+        raise HTTPException(status_code=400, detail=result.get("detail", "bad request"))
+    if result["route"] == "logistics_lookup":
+        tr = result["tool_result"]
+        advice = f"Logistics lookup (stub): shipment {tr['tracking_id']} is {tr['status']}."
+        urgency = "low"
+    elif result["route"] == "catalog_mismatch":
+        advice = f"Catalog lane (stub): flagged={result['catalog_flagged']}."
+        urgency = "low"
+    else:
+        urgency = result["urgency"]
+        advice = result["advice"]
+    model_id = result.get("model_id") or pin.get("model_id", "stub-triage-v1")
+    prompt_version = result.get("prompt_version") or pin.get("prompt_version", PROMPT_VERSION)
     return TriageResponse(
-        urgency=result["urgency"],
-        advice=result["advice"],
-        model_id=result["model_id"],
-        prompt_version=result["prompt_version"],
+        urgency=urgency,
+        advice=advice,
+        model_id=model_id,
+        prompt_version=prompt_version,
         handled_for=user["sub"],
         stub_mode=result["stub_mode"],
     )

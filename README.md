@@ -21,6 +21,8 @@ python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 python scripts/make_fixture.py --rows 300 --out fixtures/triage_messages_sample.jsonl
+python -m services.triage.rag_smoke
+pytest -q
 uvicorn services.triage.app:app --port 8000
 ```
 

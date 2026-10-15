@@ -1,0 +1,9 @@
+[tool.ruff.lint]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"check_*.py" = ["F401", "SIM103"]
+"scripts/measure_perf.py" = ["F401", "S110", "BLE001"]
+"verify_setup.py" = ["BLE001", "PLW1510", "FURB177"]
+"services/catalog/stub_mismatch.py" = ["SIM103"]
+"tests/integration/test_health.py" = ["I001"]
