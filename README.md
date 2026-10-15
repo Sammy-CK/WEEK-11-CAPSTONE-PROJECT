@@ -57,7 +57,8 @@ Stub mode by default. Optional live triage: set `OPENAI_API_KEY` in `.env` and `
 
 ## Presentation
 
-Fill `docs/presentation_outline_filled.md`; export **docs/presentation.pdf** before Week 12 Monday.
+- `docs/presentation_outline_filled.md`
+- `docs/presentation.pdf` (Week 12 Monday deck)
 
 ## Peer review
 

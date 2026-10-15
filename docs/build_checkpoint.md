@@ -20,3 +20,6 @@
 - **Live cloud deploy** (steps documented only in `docs/deployment.md`)
 - **Live LLM agent loops** beyond a capped Thursday demo (~$1 teaching budget)
 - Running MCP server process (logistics returns structured dicts; no long-lived MCP in CI)
+
+## Week 12
+- Present `docs/presentation.pdf` + README demo script
