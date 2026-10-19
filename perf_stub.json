@@ -1,6 +1,6 @@
 {
   "endpoint": "http://localhost:8000/health",
-  "p95_seconds": 2.0846,
+  "p95_seconds": 2.0564,
   "caption": "Laptop teaching stub; not a production SLA",
   "n_samples": 10
 }

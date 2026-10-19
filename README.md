@@ -1,5 +1,7 @@
 # Module 4 Capstone: AfyaPlus integrated health operations
 
+**Oral defence / invigilator walkthrough:** [CAPSTONE_INVIGILATOR_GUIDE.md](CAPSTONE_INVIGILATOR_GUIDE.md) (also [CAPSTONE_INVIGILATOR_GUIDE.txt](CAPSTONE_INVIGILATOR_GUIDE.txt), [CAPSTONE_INVIGILATOR_GUIDE.pdf](CAPSTONE_INVIGILATOR_GUIDE.pdf) — day-by-day, file-by-file, rubric mapping).
+
 Integrated Week 6–10 artefacts: triage API with JWT and Week 8 pins, Week 7 logistics tool surface, Week 9 security smoke, optional Week 10 Sokoni catalog stub lane.
 
 ## Week reuse
