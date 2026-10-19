@@ -10,8 +10,6 @@ from pydantic import BaseModel, Field
 
 from services.triage.auth import check_password, create_token, current_user
 from services.triage.handler import handle_message
-import dotenv
-dotenv.load_dotenv()
 
 load_dotenv()
 
