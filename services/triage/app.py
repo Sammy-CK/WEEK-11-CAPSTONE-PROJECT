@@ -51,6 +51,7 @@ class TriageResponse(BaseModel):
     prompt_version: str
     handled_for: str
     stub_mode: bool
+    grounded_snippet: str
 
 
 def should_use_stub(force_stub: bool = False) -> bool:
@@ -96,7 +97,7 @@ def live_triage(message: str, county: str, pin: dict) -> dict:
         else "Never diagnose. Classify urgency low, medium, or high."
     )
     try:
-        client = OpenAI()
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         response = client.chat.completions.create(
             model=model,
             temperature=0,
@@ -194,4 +195,5 @@ def triage(request: TriageRequest, user: dict = Depends(current_user)):
         prompt_version=prompt_version,
         handled_for=user["sub"],
         stub_mode=result["stub_mode"],
+        grounded_snippet=result.get("grounded_snippet", ""),
     )
